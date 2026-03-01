@@ -1,0 +1,9 @@
+venv/
+.env
+__pycache__/
+*.pyc
+roast_app.sock
+gunicorn.sock
+instance/
+client_secrets.json
+token.json

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Replaceability</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+<div class="bg-white p-8 rounded-xl shadow-xl w-96 text-center">
+    <h1 class="text-2xl font-bold mb-4">Will AI Replace You?</h1>
+
+    <form id="uploadForm" action="/analyze" method="POST" enctype="multipart/form-data">
+        <!-- Added accept attribute for .pdf and .docx -->
+        <input type="file" id="fileInput" name="file" 
+               accept=".pdf,.docx" 
+               required
+               class="block w-full text-sm border p-2 rounded focus:outline-none focus:ring-2 focus:ring-black">
+        
+        <!-- UI Hint for user -->
+        <p class="text-xs text-gray-500 mt-2 mb-4">Supported formats: PDF, DOCX only</p>
+
+        <button type="submit" id="submitBtn"
+                class="bg-black text-white px-4 py-2 rounded w-full hover:bg-gray-800 transition-colors">
+            Judge Me
+        </button>
+    </form>
+</div>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 text-white">
+    <div class="flex flex-col items-center text-center px-4">
+        <div class="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <div id="loadingMessage" class="text-xl font-semibold tracking-wider">Reading resume...</div>
+        <div id="loadingSub" class="mt-3 text-sm text-gray-400">This may take a few seconds</div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const form = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('fileInput');
+    const overlay = document.getElementById('loadingOverlay');
+    const msg = document.getElementById('loadingMessage');
+    const btn = document.getElementById('submitBtn');
+
+    const messages = [
+        'Reading resume...',
+        'Analysing your replaceability...',
+        'Comparing with $20 subscription...',
+        'Checking market trends...',
+        'Generating savage summary...'
+    ];
+
+    let idx = 0;
+
+    form.addEventListener('submit', function(e){
+        const filePath = fileInput.value;
+        const allowedExtensions = /(\.pdf|\.docx)$/i;
+
+        // Validation Check
+        if (!allowedExtensions.exec(filePath)) {
+            alert('Please upload a file in .pdf or .docx format only.');
+            fileInput.value = ''; // clear the input
+            e.preventDefault(); // stop form from submitting
+            return false;
+        }
+
+        // If validation passes, show the spinner
+        overlay.classList.remove('hidden');
+        btn.disabled = true;
+        btn.classList.add('opacity-50','cursor-not-allowed');
+
+        // Rotate messages every 2 seconds
+        setInterval(function(){
+            idx = (idx + 1) % messages.length;
+            msg.textContent = messages[idx];
+        }, 2000);
+    });
+});
+</script>
+
+</body>
+</html>

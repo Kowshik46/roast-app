@@ -1,0 +1,12 @@
+Flask
+python-dotenv
+pypdf
+requests
+openai
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+python-docx
+langfuse==2.40.0
+supabase
+gunicorn

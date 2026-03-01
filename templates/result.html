@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results | {{ filename }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .balance { text-wrap: balance; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+
+    <!-- Compact header: one row on all devices, minimal scroll -->
+    <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="flex h-2 w-2 rounded-full bg-red-500 shrink-0"></span>
+                <span class="text-sm font-bold uppercase tracking-tight truncate">Threat: {{ filename }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider {{ status.border }} {{ status.bg }} {{ status.color }}">{{ status.label }}</span>
+                <a href="/" class="text-xs font-semibold text-zinc-400 hover:text-zinc-100 border border-zinc-700 hover:border-zinc-500 rounded px-3 py-1.5 transition-colors">New upload</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
+
+        <!-- Score + subtext: single compact block -->
+        <section class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span class="text-5xl sm:text-6xl md:text-7xl font-black leading-none tracking-tighter {{ status.color }}">{{ score }}</span>
+            <span class="text-2xl sm:text-3xl font-bold text-zinc-600">/10</span>
+            <span class="w-full sm:w-auto text-base sm:text-lg font-semibold text-zinc-300">{{ status.subtext }}</span>
+        </section>
+
+        <!-- Primary risk reason -->
+        <section>
+            <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1.5">Primary risk</h2>
+            <p class="text-base sm:text-lg text-zinc-300 leading-snug">{{ reasoning }}</p>
+        </section>
+
+        <!-- Optional: score breakdown and calculation -->
+        <section class="rounded-2xl border border-zinc-800 bg-zinc-900/30 overflow-hidden">
+            <button type="button" id="btnScoreBreakdown" class="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-semibold text-zinc-300 hover:bg-zinc-800/50 transition-colors" aria-expanded="false" aria-controls="scoreBreakdownPanel">
+                <span>Show individual scores & calculation</span>
+                <svg id="scoreBreakdownChevron" class="w-4 h-4 text-zinc-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="scoreBreakdownPanel" class="hidden border-t border-zinc-800">
+                <div class="p-4 sm:p-5 space-y-5">
+                    <!-- Formula -->
+                    <div class="rounded-xl bg-zinc-950/60 p-3 font-mono text-xs sm:text-sm text-zinc-400">
+                        <p class="font-semibold text-zinc-300 mb-1">Formula</p>
+                        <p>0.4×Rep − 0.2×Lead − 0.2×Strategy − 0.2×AI = <span class="text-zinc-200">{{ score_breakdown.raw_value }}</span> → +6 and clamp to 0–10 = <span class="text-zinc-100 font-bold">{{ score_breakdown.final_score }}</span>/10</p>
+                    </div>
+                    <!-- Per-score table -->
+                    <div class="space-y-3">
+                        <p class="font-semibold text-zinc-400 text-sm">Scores & reasoning</p>
+                        <ul class="space-y-4">
+                            <li class="border-b border-zinc-800 pb-3">
+                                <div class="flex flex-wrap items-baseline gap-2 mb-1">
+                                    <span class="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Repetitive (0–10)</span>
+                                    <span class="text-zinc-200 font-bold">{{ score_breakdown.repetitive_score }}</span>
+                                </div>
+                                {% if score_breakdown.repetitive_reasoning %}<p class="text-zinc-400 text-sm leading-snug">{{ score_breakdown.repetitive_reasoning }}</p>{% endif %}
+                            </li>
+                            <li class="border-b border-zinc-800 pb-3">
+                                <div class="flex flex-wrap items-baseline gap-2 mb-1">
+                                    <span class="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Leadership (0–10)</span>
+                                    <span class="text-zinc-200 font-bold">{{ score_breakdown.leadership_score }}</span>
+                                </div>
+                                {% if score_breakdown.leadership_reasoning %}<p class="text-zinc-400 text-sm leading-snug">{{ score_breakdown.leadership_reasoning }}</p>{% endif %}
+                            </li>
+                            <li class="border-b border-zinc-800 pb-3">
+                                <div class="flex flex-wrap items-baseline gap-2 mb-1">
+                                    <span class="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Strategy (0–10)</span>
+                                    <span class="text-zinc-200 font-bold">{{ score_breakdown.strategy_score }}</span>
+                                </div>
+                                {% if score_breakdown.strategy_reasoning %}<p class="text-zinc-400 text-sm leading-snug">{{ score_breakdown.strategy_reasoning }}</p>{% endif %}
+                            </li>
+                            <li class="pb-1">
+                                <div class="flex flex-wrap items-baseline gap-2 mb-1">
+                                    <span class="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">AI exposure (0–10)</span>
+                                    <span class="text-zinc-200 font-bold">{{ score_breakdown.ai_exposure_score }}</span>
+                                </div>
+                                {% if score_breakdown.ai_exposure_reasoning %}<p class="text-zinc-400 text-sm leading-snug">{{ score_breakdown.ai_exposure_reasoning }}</p>{% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roast: the savage summary -->
+        <section class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 sm:p-5">
+            <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">The roast</h2>
+            <p class="text-base sm:text-lg text-zinc-200 leading-relaxed whitespace-pre-line">{{ roast }}</p>
+        </section>
+
+        <!-- On-demand: actionable improvements (saves tokens until user asks) -->
+        <section class="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4 sm:p-5">
+            <h2 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">What you can do next</h2>
+            <p class="text-sm text-zinc-400 mb-4">Get a short list of concrete steps based on your resume and score. We only run this when you ask, to save cost.</p>
+            <button type="button" id="btnImprovements" class="bg-zinc-100 text-zinc-900 text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                Generate my action plan
+            </button>
+            <div id="improvementsWrap" class="hidden mt-4 space-y-3"></div>
+            <p id="improvementsError" class="hidden mt-2 text-sm text-red-400"></p>
+        </section>
+
+        <p class="text-xs text-zinc-500 italic">Analysis assumes current LLM capabilities. High scores = automate your own work before someone else does.</p>
+    </main>
+
+    <script>
+(function() {
+    var btn = document.getElementById('btnImprovements');
+    var wrap = document.getElementById('improvementsWrap');
+    var errEl = document.getElementById('improvementsError');
+
+    btn.addEventListener('click', function() {
+        btn.disabled = true;
+        btn.textContent = 'Generating…';
+        wrap.classList.add('hidden');
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+
+        fetch('/get-improvements', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(o) {
+                if (!o.ok) {
+                    errEl.textContent = o.data.error || 'Something went wrong.';
+                    errEl.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.textContent = 'Generate my action plan';
+                    return;
+                }
+                var list = o.data.improvements || [];
+                wrap.innerHTML = '';
+                if (list.length === 0) {
+                    wrap.innerHTML = '<p class="text-zinc-500 text-sm">No items returned.</p>';
+                } else {
+                    list.forEach(function(tip, i) {
+                        var div = document.createElement('div');
+                        div.className = 'flex gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3';
+                        div.innerHTML = '<span class="text-zinc-600 font-bold text-lg leading-none">' + (i + 1) + '</span><p class="text-zinc-200 text-sm sm:text-base leading-snug">' + escapeHtml(tip) + '</p>';
+                        wrap.appendChild(div);
+                    });
+                }
+                wrap.classList.remove('hidden');
+                btn.textContent = 'Done';
+            })
+            .catch(function() {
+                errEl.textContent = 'Request failed. Try again.';
+                errEl.classList.remove('hidden');
+                btn.disabled = false;
+                btn.textContent = 'Generate my action plan';
+            });
+    });
+
+    function escapeHtml(s) {
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+})();
+
+(function() {
+    var btn = document.getElementById('btnScoreBreakdown');
+    var panel = document.getElementById('scoreBreakdownPanel');
+    var chevron = document.getElementById('scoreBreakdownChevron');
+    if (!btn || !panel) return;
+    btn.addEventListener('click', function() {
+        var open = panel.classList.toggle('hidden');
+        btn.setAttribute('aria-expanded', !open);
+        chevron.style.transform = open ? '' : 'rotate(180deg)';
+    });
+})();
+    </script>
+</body>
+</html>

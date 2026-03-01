@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume too long</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full text-center">
+        <div class="text-6xl mb-4">📚</div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-100 mb-3">
+            That's not a resume — are you writing a book?
+        </h1>
+        <p class="text-zinc-400 mb-6">
+            Your file is <strong class="text-zinc-300">{{ actual_chars | int }}</strong> characters. We cap at <strong class="text-zinc-300">{{ max_chars | int }}</strong> so the AI can read it without losing the plot.
+        </p>
+        <p class="text-zinc-500 text-sm mb-8">
+            Trim it down (e.g. keep last 10–15 years, one page per decade) and try again.
+        </p>
+        <a href="/" class="inline-block bg-zinc-100 text-zinc-900 font-semibold px-6 py-3 rounded-lg hover:bg-white transition-colors">
+            Upload a shorter resume
+        </a>
+    </div>
+</body>
+</html>
